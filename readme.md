@@ -7,6 +7,5 @@
 <h2>planned features:</h2>
 <ul>
     <li>background-color, color, font-size, border, text-decoration and other properties</li>
-    <li>working with docx file, not xml</li>
     <li>headers, tables, images and other elements</li>
 </ul>
