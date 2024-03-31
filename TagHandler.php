@@ -47,9 +47,12 @@ class TagHandler{
         } 
     }
 
-    function default ($domElement){
-        $name = $domElement->nodeName;
-        $name = remove_namespace($name);
+    function default ($domElement, $tagName = ""){
+        $name = $tagName;
+        if (!strlen($tagName)){
+            $name = $domElement->nodeName;
+            $name = remove_namespace($name);
+        }
         $innercontent = "";
         $nodes = $domElement->childNodes;
         if (count($nodes)) {
@@ -63,6 +66,18 @@ class TagHandler{
         }
         $css = $this->get_css($domElement);
         return '<' . $name . $css . '>' . $innercontent . '</' . $name . '>';
+    }
+
+    function r($domElement){
+        return $this->default ($domElement, "span");
+    }
+
+    function rPr($domElement){
+        return "";
+    }
+
+    function t($domElement){
+        return $domElement->textContent;
     }
 
     function property_glow($propElement){
