@@ -2,6 +2,8 @@
 
 require_once 'TagHandler.php';
 
+define("CASHFOLDER", "docxToHtmlCashFolder");
+
 class Handler{
 
     public $taghandler;// = new ZipArchive;
@@ -14,12 +16,13 @@ class Handler{
     }
 
     function __destruct(){
-        $this->deleteDir("cash");
+        $this->deleteDir(CASHFOLDER);
     }
     
     function handle(){
         $this->unpack();
-        $xml = file_get_contents("cash/word/document.xml");
+        $xml = file_get_contents(CASHFOLDER . "/word/document.xml");
+        $this->deleteDir(CASHFOLDER);
         $dom = new DOMDocument();
         $dom->loadXML($xml);
         return $this->taghandler->get_html($dom->documentElement);
@@ -36,17 +39,15 @@ class Handler{
         $zip = new ZipArchive;
         $zip->open($this->path);
 
-        $extractDir = "cash";
-
-        if (is_dir($extractDir)) {
-            $this->deleteDir($extractDir);
+        if (is_dir(CASHFOLDER)) {
+            $this->deleteDir(CASHFOLDER);
         }
 
-        if (!mkdir($extractDir)) {
+        if (!mkdir(CASHFOLDER)) {
             echo "ERROR: DocxToHtml mkdir failed";
         }
 
-        if (!($zip->extractTo($extractDir))) {
+        if (!($zip->extractTo(CASHFOLDER))) {
             echo "ERROR: DocxToHtml zip extract failed";
         }
     }
