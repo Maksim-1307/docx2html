@@ -18,6 +18,14 @@ class Handler{
     function __destruct(){
         $this->deleteDir(CASHFOLDER);
     }
+
+    function get_html(){
+        return $this->handle();
+    }
+
+    function save_html($path){
+        return 1;
+    }
     
     function handle(){
         $this->unpack();

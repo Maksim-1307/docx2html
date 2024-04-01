@@ -76,16 +76,97 @@ class TagHandler{
         return "";
     }
 
+    function ppr($domElement)
+    {
+        return "";
+    }
+
     function t($domElement){
         return $domElement->textContent;
+    }
+
+    
+
+    function tab($domElement){
+        return "    ";
+    }
+
+    function tbl($domElement){
+        return "";
     }
 
     function property_glow($propElement){
         $colorElement = $propElement->getElementsByTagName("srgbClr");
         $colorVal = $colorElement[0]->attributes[0]->nodeValue;
-        if (!$colorVal) echo "fail";
-        return "background-color: " . $colorVal;
+        return "background-color: " . $colorVal . ";";
     }
+
+    function property_highlight($propElement)
+    {
+        $colorVal = $propElement->attributes[0]->nodeValue;
+        return "background-color: " . $colorVal . ";";
+    }
+
+    function property_b($propElement){
+        return "font-weight: bold;";
+    }
+
+    function property_color($propElement)
+    {
+        $colorVal = $propElement->attributes[0]->nodeValue;
+        return "color: " . $colorVal . ";";
+    }
+
+    function property_u($propElement)
+    {
+        $css = "text-decoration: underline;text-decoration-style:";
+        $style = $propElement->attributes[0]->nodeValue;
+        switch ($style) {
+            case "double":  $css .= "double"; break;
+            case "dotted":  $css .= "dotted"; break;
+            case "dash":    $css .= "dashed"; break;
+            case "wave":    $css .= "wavy"; break;
+            case "dotDash": $css .= "dashed"; break;
+            case "thick":   $css .= "solid"; break;
+            default:  $css .= "solid"; break;
+        }
+        return $css . ";";
+    }
+
+    function property_szCs($propElement)
+    {
+        return $this->property_sz($propElement);
+    }
+
+    function property_sz($propElement)
+    {
+        $size = $propElement->attributes[0]->nodeValue;
+        return "font-size: " . $size . "px;";
+    }
+
+    function property_strike($propElement){
+        return "text-decoration: line-through;";
+    }
+
+    function property_i($propElement){
+        return "font-style: italic;";
+    }
+
+    function property_pStyle($propElement){
+        $header = $propElement->attributes[0]->nodeValue;
+        if ($header == "Heading1"){
+            return "color: red;";
+        }
+    }
+
+    function property_numPr($propElement) {
+        $tab = (int)$propElement->childNodes[0]->attributes[0]->nodeValue;
+        //$num = $propElement->attributes[1]->nodeValue;
+        $tabsize = 30; // px
+
+        return "padding-left: " . $tabsize * $tab . "px;display:block";
+    }
+    
 
 }
 
