@@ -8,7 +8,7 @@ class Handler{
 
     public $taghandler;// = new ZipArchive;
     public $path;
-    public $xml;
+    public $xml, $stylesXml;
 
     function __construct($pathToDocx) {
         $this->path = $pathToDocx;
@@ -20,7 +20,20 @@ class Handler{
     }
 
     function get_html(){
-        return $this->handle();
+        $this->handle();
+        $dom = new DOMDocument();
+        $dom->loadXML($this->xml);
+        return $this->get_css() . $this->taghandler->get_html($dom->documentElement);
+    }
+
+    function get_css(){
+        $stylesDoc = new DOMDocument();
+        if ($this->stylesXml){
+            $stylesDoc->loadXML($this->stylesXml);
+            return $this->taghandler->get_html($stylesDoc->documentElement);
+        } else {
+            return "";
+        }
     }
 
     function save_html($path){
@@ -29,11 +42,9 @@ class Handler{
     
     function handle(){
         $this->unpack();
-        $xml = file_get_contents(CASHFOLDER . "/word/document.xml");
+        $this->xml = file_get_contents(CASHFOLDER . "/word/document.xml");
+        $this->stylesXml = file_get_contents(CASHFOLDER . "/word/styles.xml");
         $this->deleteDir(CASHFOLDER);
-        $dom = new DOMDocument();
-        $dom->loadXML($xml);
-        return $this->taghandler->get_html($dom->documentElement);
     }
 
     function deleteDir(string $dir)

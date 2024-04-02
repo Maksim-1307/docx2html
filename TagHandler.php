@@ -1,6 +1,7 @@
 <?php
 
 define('POPERTY_FUNCTION_REFIX', 'prop_');
+define('CSS_CLASS_REFIX', 'docx_to_html_css_prefix_');
 
 
 function remove_namespace($str){
@@ -25,18 +26,20 @@ class TagHandler{
         }
     }
 
-    function get_css($domElement)
+    function get_css($stylesElement)
     {
-        $styleElementName = remove_namespace($domElement->nodeName) . "Pr";
-        $styleElement = $domElement->getElementsByTagName($styleElementName)[0];
-        if (!$styleElement) {
-            return "";
-        }
+        if (!$stylesElement) return "";
+        // $styleElementName = remove_namespace($stylesElement->nodeName) . "Pr";
+        // $styleElement = $stylesElement->getElementsByTagName($styleElementName)[0];
+        // // if (!$styleElement) {
+        // //     return "";
+        // // }
         $css = "";
-        $propTags = $styleElement->childNodes;
-        foreach ($propTags as $propTag) {
+        //$propTags = $styleElement->childNodes;
+        foreach ($stylesElement->childNodes as $propTag) {
             $css .= $this->get_property($propTag);
         }
+        return $css;
         if ($css) return ' style="' . $css . '"';
     }
 
@@ -45,6 +48,33 @@ class TagHandler{
         if (method_exists($this, $funcname)) {
             return $this->$funcname($propDomElement);
         } 
+    }
+
+    function get_style_element($domElement){
+        if (!$domElement) return;
+        foreach ($domElement->childNodes as $child){
+            $name = $child->nodeName;
+            if (substr($name, 3, 2) == "Pr"){
+                return $child;
+            }
+        } 
+    }
+
+    function get_class_prop($domElement){
+        foreach ($domElement->childNodes as $child) {
+            $name = $child->nodeName;
+            if (substr($name, strlen($name) - 5, 5) == "Style") {
+                return $child;
+            }
+        } 
+    }
+
+    function get_class($domElement){
+        $stylesElement = $this->get_style_element($domElement);
+        if (!$stylesElement) return;
+        $class_prop = $this->get_class_prop($stylesElement);
+        if (!$class_prop) return;
+        return CSS_CLASS_REFIX . $class_prop->getAttribute("w:val");
     }
 
     function default ($domElement, $tagName = ""){
@@ -64,8 +94,13 @@ class TagHandler{
             $innercontent .= ($domElement->nodeValue);
             return $innercontent;
         }
-        $css = $this->get_css($domElement);
-        return '<' . $name . $css . '>' . $innercontent . '</' . $name . '>';
+        // $stylesElement = $domElement->getElementsByTagName($name . "Pr")[0];
+        $stylesElement = $this->get_style_element($domElement);
+        $css = $this->get_css($stylesElement);
+        $class = $this->get_class($domElement);
+        if ($css) $css = ' style="' . $css . '"';
+        if ($class) $class = ' class="' . $class . '"';
+        return '<' . $name . $class . $css . '>' . $innercontent . '</' . $name . '>';
     }
 
     function r($domElement){
@@ -95,10 +130,22 @@ class TagHandler{
         return "";
     }
 
+    function styles($domElement){
+        return $this->default($domElement, "style");
+    }
+
+    function style($domElement){
+        $class = $domElement->getAttribute("w:styleId");
+        $css = "." . CSS_CLASS_REFIX . $class . "{" . $this->get_css($this->get_style_element($domElement)) . "}";
+        return $css;
+    }
+
+    // replace attributes[id] to getAttribute
+
     function property_glow($propElement){
         $colorElement = $propElement->getElementsByTagName("srgbClr");
         $colorVal = $colorElement[0]->attributes[0]->nodeValue;
-        return "background-color: " . $colorVal . ";";
+        return "background-color: #" . $colorVal . ";";
     }
 
     function property_highlight($propElement)
@@ -114,7 +161,7 @@ class TagHandler{
     function property_color($propElement)
     {
         $colorVal = $propElement->attributes[0]->nodeValue;
-        return "color: " . $colorVal . ";";
+        return "color: #" . $colorVal . ";";
     }
 
     function property_u($propElement)
@@ -166,7 +213,10 @@ class TagHandler{
 
         return "padding-left: " . $tabsize * $tab . "px;display:block";
     }
-    
+
+    function property_spacing($propElement){
+        return "color: red";
+    }
 
 }
 
