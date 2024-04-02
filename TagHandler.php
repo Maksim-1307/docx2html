@@ -54,10 +54,23 @@ class TagHandler{
         if (!$domElement) return;
         foreach ($domElement->childNodes as $child){
             $name = $child->nodeName;
-            if (substr($name, 3, 2) == "Pr"){
+            if (substr($name, strlen($name) - 2, 2) == "Pr"){
                 return $child;
             }
         } 
+    }
+
+    function get_style_elements($domElement)
+    {
+        if (!$domElement) return;
+        $elements = array();
+        foreach ($domElement->childNodes as $child) {
+            $name = $child->nodeName;
+            if (substr($name, strlen($name) - 2, 2) == "Pr") {
+                array_push($elements, $child);
+            }
+        }
+        return $elements;
     }
 
     function get_class_prop($domElement){
@@ -136,7 +149,12 @@ class TagHandler{
 
     function style($domElement){
         $class = $domElement->getAttribute("w:styleId");
-        $css = "." . CSS_CLASS_REFIX . $class . "{" . $this->get_css($this->get_style_element($domElement)) . "}";
+        $styleElements = $this->get_style_elements($domElement);
+        $css = "." . CSS_CLASS_REFIX . $class . "{";
+        foreach ($styleElements as $sEl){
+            $css .= $this->get_css($sEl);
+        }
+        $css .= "}";
         return $css;
     }
 
@@ -199,23 +217,12 @@ class TagHandler{
         return "font-style: italic;";
     }
 
-    function property_pStyle($propElement){
-        $header = $propElement->attributes[0]->nodeValue;
-        if ($header == "Heading1"){
-            return "color: red;";
-        }
-    }
-
     function property_numPr($propElement) {
         $tab = (int)$propElement->childNodes[0]->attributes[0]->nodeValue;
         //$num = $propElement->attributes[1]->nodeValue;
         $tabsize = 30; // px
 
         return "padding-left: " . $tabsize * $tab . "px;display:block";
-    }
-
-    function property_spacing($propElement){
-        return "color: red";
     }
 
 }
