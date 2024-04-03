@@ -140,7 +140,15 @@ class TagHandler{
     }
 
     function tbl($domElement){
-        return "";
+        return $this->default($domElement, "table");
+    }
+    function tr($domElement)
+    {
+        return $this->default($domElement, "tr");
+    }
+    function tc($domElement)
+    {
+        return $this->default($domElement, "td");
     }
 
     function styles($domElement){
@@ -150,12 +158,20 @@ class TagHandler{
     function style($domElement){
         $class = $domElement->getAttribute("w:styleId");
         $styleElements = $this->get_style_elements($domElement);
-        $css = "." . CSS_CLASS_REFIX . $class . "{";
-        foreach ($styleElements as $sEl){
+        $css = "";
+        foreach ($styleElements as $sEl) {
             $css .= $this->get_css($sEl);
         }
-        $css .= "}";
+        $css = "." . CSS_CLASS_REFIX . $class . "{" . $css . "}";
         return $css;
+    }
+
+    function docDefaults($domElement){
+        return "";
+    }
+    function latentStyles($domElement)
+    {
+        return "";
     }
 
     // replace attributes[id] to getAttribute
@@ -223,6 +239,59 @@ class TagHandler{
         $tabsize = 30; // px
 
         return "padding-left: " . $tabsize * $tab . "px;display:block";
+    }
+
+    function property_jc($propElement){
+        $val = $propElement->getAttribute("w:val");
+        return "display:flex;justify-content: ". $val .";";
+    }
+
+    function property_tblBorders($propElement){
+        $css = "";
+        foreach($propElement->childNodes as $child){
+            $name = remove_namespace($child->nodeName);
+            $color = "#" . $child->getAttribute("w:color");
+            $size = (int)$child->getAttribute("w:sz") / 8 . "pt";
+            $type = $child->getAttribute("w:val");
+            switch ($type) {
+                case "double":
+                    $type = "double";
+                    break;
+                case "dotted":
+                    $type = "dotted";
+                    break;
+                case "dash":
+                    $type = "dashed";
+                    break;
+                case "wave":
+                    $type = "wavy";
+                    break;
+                case "dotDash":
+                    $type = "dashed";
+                    break;
+                case "thick":
+                    $type= "solid";
+                    break;
+                default:
+                    $type = "solid";
+                    break;
+            }
+            $css .= "border-" . $name . ": " . $size . " " . $type . " " . $color . ";";
+        }
+        return $css;
+    }
+    // border-top: 1px solid red;
+    // <w:tblBorders>
+    //     <w:top w:val="single" w:sz="8" w:space="0" w:color="9BBB59" w:themeColor="accent3" />
+    //     <w:left w:val="single" w:sz="8" w:space="0" w:color="9BBB59" w:themeColor="accent3" />
+    //     <w:bottom w:val="single" w:sz="8" w:space="0" w:color="9BBB59"
+    //         w:themeColor="accent3" />
+    //     <w:right w:val="single" w:sz="8" w:space="0" w:color="9BBB59" w:themeColor="accent3" />
+    // </w:tblBorders>
+
+    function property_shd($propElement){
+        $val = $propElement->getAttribute("w:fill");
+        return "background-color: #".$val.";";
     }
 
 }
